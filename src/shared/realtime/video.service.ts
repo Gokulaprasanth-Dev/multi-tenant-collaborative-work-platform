@@ -41,10 +41,10 @@ export async function handleCallJoin(
 
   // Create/update video_calls DB row
   await queryPrimary(
-    `INSERT INTO video_calls (id, channel_id, org_id, status, started_at)
-     VALUES ($1, $2, $3, 'active', NOW())
-     ON CONFLICT (id) DO UPDATE SET status = 'active'`,
-    [callId, channelId, orgId]
+    `INSERT INTO video_calls (id, channel_id, org_id, initiator_id, state, started_at)
+     VALUES ($1, $2, $3, $4, 'active', NOW())
+     ON CONFLICT (id) DO UPDATE SET state = 'active'`,
+    [callId, channelId, orgId, userId]
   );
 
   io.to(`call:${callId}`).emit('call:participant-joined', { userId, callId });
@@ -66,7 +66,7 @@ export async function handleCallLeave(
   const count = await redisClient.scard(`call:participants:${callId}`);
   if (count === 0) {
     await queryPrimary(
-      `UPDATE video_calls SET status = 'ended', ended_at = NOW() WHERE id = $1`,
+      `UPDATE video_calls SET state = 'ended', ended_at = NOW() WHERE id = $1`,
       [callId]
     );
   }

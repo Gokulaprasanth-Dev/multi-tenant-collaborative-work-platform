@@ -32,6 +32,10 @@ export async function createDirect(
   creatorId: string,
   otherUserId: string
 ): Promise<{ channel: ChannelRow; created: boolean }> {
+  if (creatorId === otherUserId) {
+    throw new AppError(400, 'CANNOT_DM_SELF', 'Cannot create a direct message channel with yourself');
+  }
+
   // Canonical ordering: user_a_id < user_b_id (UUID string comparison matches CHECK constraint)
   const userAId = creatorId < otherUserId ? creatorId : otherUserId;
   const userBId = creatorId < otherUserId ? otherUserId : creatorId;

@@ -48,7 +48,7 @@ Persistent 1:1 and group channels with threading, read receipts, offline deliver
 
 ### Video Conferencing (Signaling)
 
-WebRTC signaling relay via Socket.IO for 1:1 and small-group calls. Call state tracked in Redis with 4-hour TTL. Call lifecycle: `ringing → active → ended`. No media storage — signaling only.
+WebRTC signaling relay via Socket.IO for 1:1 and small-group calls, with optional LiveKit media server integration (`LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`). Call state tracked in Redis with 4-hour TTL and persisted in `video_calls` table (`state` column: `ringing → active → ended`). No media storage on the platform — media is handled by LiveKit if configured.
 
 ### Notifications and Email
 
@@ -70,7 +70,7 @@ Tenants register HTTPS endpoints to receive signed platform events. Delivery inc
 
 ### Full-Text Search
 
-Search across tasks, messages, files, and users within an org. PostgreSQL FTS in development; Typesense `0.25.2` in production. Graceful degradation if search service is down — falls back to PostgreSQL FTS with `search_degraded: true` in the response.
+Search across tasks, messages, files, and users within an org. PostgreSQL FTS in development; Typesense `26.0` in production (`typesense` npm package `1.5.4`). Graceful degradation if search service is down — falls back to PostgreSQL FTS with `search_degraded: true` in the response.
 
 ### MFA and Backup Codes (CROSS-002 fix)
 

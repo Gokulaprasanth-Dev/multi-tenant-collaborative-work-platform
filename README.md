@@ -29,7 +29,7 @@ A production-ready multi-tenant SaaS platform built with Node.js, TypeScript, Po
 - PostgreSQL 16
 - Redis 7
 - Docker & Docker Compose (for local dev)
-- Optional: Typesense 0.25, ClamAV, AWS S3, Razorpay
+- Optional: Typesense 26.0+, ClamAV, AWS S3, Razorpay, LiveKit
 
 ## Quick Start
 
@@ -98,15 +98,17 @@ npm run typecheck
 | `REDIS_PASSWORD` | No | Redis authentication password |
 | `JWT_PRIVATE_KEY_BASE64` | Yes | RS256 private key, base64-encoded |
 | `JWT_PUBLIC_KEY_BASE64` | Yes | RS256 public key, base64-encoded |
-| `JWT_ACCESS_EXPIRY` | No | Access token TTL (default: `15m`) |
-| `JWT_REFRESH_EXPIRY` | No | Refresh token TTL (default: `7d`) |
+| `JWT_ACCESS_TOKEN_TTL` | No | Access token TTL in seconds (default: `900`) |
 | `RAZORPAY_KEY_ID` | No | Razorpay API key ID |
 | `RAZORPAY_KEY_SECRET` | No | Razorpay API key secret |
 | `RAZORPAY_WEBHOOK_SECRET` | No | Razorpay webhook signing secret |
 | `AWS_REGION` | No | AWS region (default: `ap-south-1`) |
 | `AWS_S3_BUCKET` | No | S3 bucket for file storage and GDPR exports |
-| `TYPESENSE_URL` | No | Typesense server URL |
+| `TYPESENSE_URL` | No | Typesense server URL (v26.0+) |
 | `TYPESENSE_API_KEY` | No | Typesense API key |
+| `LIVEKIT_URL` | No | LiveKit server URL (WebRTC signaling) |
+| `LIVEKIT_API_KEY` | No | LiveKit API key |
+| `LIVEKIT_API_SECRET` | No | LiveKit API secret |
 | `CLAMAV_HOST` | No | ClamAV daemon host |
 | `CLAMAV_PORT` | No | ClamAV daemon port (default: `3310`) |
 | `VIRUS_SCAN_ENABLED` | No | Enable virus scanning (`true`/`false`) |
@@ -135,7 +137,7 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 ## Generate OpenAPI Documentation
 
 ```bash
-npm run generate:openapi    # writes dist/openapi.json
+npm run generate:openapi    # writes dist/openapi.json (82 paths, 96 operations, all modules)
 npm run dev                 # then visit http://localhost:3000/api-docs
 ```
 

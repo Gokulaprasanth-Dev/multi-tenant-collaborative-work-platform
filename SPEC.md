@@ -877,6 +877,7 @@ User [1]
 - `INV-CHAT-01`: One direct channel per user pair per org, enforced via `direct_channel_pairs` PK.
 - `INV-CHAT-02`: `sequence_number` strictly monotonically increasing per channel via PostgreSQL sequence.
 - `INV-CHAT-03`: Duplicate `client_message_id` returns existing message without new row.
+- `INV-CHAT-04`: A user MUST NOT create a direct message channel with themselves. If `creatorId === otherUserId`, the service MUST return `400 CANNOT_DM_SELF` before any database operation. Do not rely on the `direct_channel_pairs CHECK (user_a_id < user_b_id)` constraint — a self-reference produces a DB constraint violation (500) rather than a clean 400.
 
 ### 4.5 Files
 
@@ -1017,9 +1018,11 @@ All endpoints use `/api/v1/` prefix. Authenticated endpoints require `Authorizat
 | DELETE | `/api/v1/org/:org_id/members/:user_id` | Bearer + OrgAdmin | Remove member |
 | POST | `/api/v1/org/:org_id/export` | Bearer + OrgAdmin | Enqueue org data export (202) |
 
-### 6.4–6.13: Full endpoint tables
+### 6.4–6.13: Full Endpoint Tables
 
-[All task, chat, notification, file, payment, search, webhook, health, and platform-admin endpoint tables remain as defined in the original document — unchanged from above. The complete API surface is defined by the route tasks in TASK.md Phases 4–19.]
+The complete REST API surface is documented in `dist/openapi.json` (generated via `npm run generate:openapi`). The document covers 82 paths and 96 operations across all modules. Refer to it as the authoritative endpoint reference. Swagger UI is served at `GET /api-docs` when the server is running.
+
+Module coverage: Auth (§6.1), User (`GET /me`), Organization (§6.3), Workspace, Task (CRUD, dependencies, bulk, templates, comments, activity), Chat (direct/group channels, messages), Notification (in-app, preferences, unsubscribe), File (upload URL, download URL, list, metadata), Payment (orders, verify, history, subscription, Razorpay webhook), Search, Webhook (register, rotate secret, delete), Feature Flag (platform admin), Platform Admin (org management, user unlock, MFA reset, JWT rotation, queue management), GDPR (user export, erasure, org export, offboarding), Health (`/live`, `/ready`, `/health`).
 
 ---
 

@@ -98,6 +98,18 @@ maybeDescribe('Chat API', () => {
       channelId = (res.body.data as { id: string }).id;
     });
 
+    it('returns 400 CANNOT_DM_SELF when other_user_id equals own user id', async () => {
+      const res = await request(app)
+        .post(`/api/v1/orgs/${orgId}/channels/direct`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .set('X-Org-ID', orgId)
+        .set('Idempotency-Key', uuidv4())
+        .send({ other_user_id: userAId })
+        .expect(400);
+
+      expect(res.body.error?.code).toBe('CANNOT_DM_SELF');
+    });
+
     it('returns existing channel (200) on duplicate request — no 409', async () => {
       const res = await request(app)
         .post(`/api/v1/orgs/${orgId}/channels/direct`)

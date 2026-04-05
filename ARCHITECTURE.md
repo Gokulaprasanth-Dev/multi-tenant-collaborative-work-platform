@@ -928,9 +928,9 @@ interface ISearchProvider {
 }
 ```
 
-### 12.2 Typesense (pinned to 0.25.2)
+### 12.2 Typesense (pinned to 26.0 / npm 1.5.4)
 
-Install `typesense@0.25.2` (pinned — no caret). Docker image: `typesense/typesense:0.25.2`. Both MUST match — version mismatch causes API incompatibility.
+Install `typesense@1.5.4` (pinned — no caret). Docker image: `typesense/typesense:26.0`. Both MUST match — version mismatch causes API incompatibility.
 
 Every Typesense search query MUST include `filter_by: 'org_id:={orgId}'`. Unit test asserts this is present on every search call.
 
@@ -1338,7 +1338,7 @@ services:
       retries: 5
 
   search:
-    image: typesense/typesense:0.25.2
+    image: typesense/typesense:26.0
     volumes:
       - searchdata:/data
     environment:
@@ -1481,15 +1481,15 @@ The `package.json` scripts section MUST include ALL of the following. Without th
     "build": "tsc",
     "start": "node dist/app.js",
     "start:worker": "node dist/worker.js",
-    "dev": "ts-node src/app.ts",
-    "dev:worker": "ts-node src/worker.ts",
+    "dev": "ts-node --transpile-only src/app.ts",
+    "dev:worker": "ts-node --transpile-only src/worker.ts",
     "migrate:up": "node-pg-migrate up --migration-file-language js",
     "migrate:down": "node-pg-migrate down --migration-file-language js",
     "migrate:test": "DATABASE_URL=$TEST_DATABASE_URL node-pg-migrate up --migration-file-language js",
-    "test:unit": "jest --testPathPattern=tests/unit --passWithNoTests",
-    "test:integration": "jest --testPathPattern=tests/integration --runInBand --passWithNoTests",
-    "test:e2e": "jest --testPathPattern=tests/e2e --runInBand --passWithNoTests",
-    "test:smoke": "jest --testPathPattern=tests/smoke --runInBand --passWithNoTests",
+    "test:unit": "jest --testPathPattern=tests/unit --passWithNoTests --forceExit",
+    "test:integration": "jest --testPathPattern=tests/integration --runInBand --passWithNoTests --forceExit",
+    "test:e2e": "jest --testPathPattern=tests/e2e --runInBand --passWithNoTests --forceExit",
+    "test:smoke": "jest --testPathPattern=tests/smoke --runInBand --passWithNoTests --forceExit",
     "seed:loadtest": "ts-node scripts/seed-loadtest.ts",
     "generate:openapi": "ts-node scripts/generate-openapi.ts",
     "lint": "eslint src --ext .ts --max-warnings 0",

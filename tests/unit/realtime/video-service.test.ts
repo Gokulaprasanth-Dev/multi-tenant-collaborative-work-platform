@@ -129,7 +129,7 @@ describe('handleCallJoin', () => {
     expect(mockExpire).toHaveBeenCalledWith('call:participants:call-1', expect.any(Number));
   });
 
-  it('upserts video_calls row in DB', async () => {
+  it('upserts video_calls row in DB with correct state column and initiator_id', async () => {
     const socket = makeSocket('user-1', 'org-1');
     const io = makeIo();
 
@@ -137,8 +137,12 @@ describe('handleCallJoin', () => {
 
     expect(mockQueryPrimary).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO video_calls'),
-      ['call-1', 'ch-1', 'org-1']
+      ['call-1', 'ch-1', 'org-1', 'user-1']
     );
+    // Must use `state` column, not `status`
+    const sql = mockQueryPrimary.mock.calls[0][0] as string;
+    expect(sql).toContain('state');
+    expect(sql).not.toContain('status');
   });
 
   it('emits call:participant-joined to call room', async () => {
@@ -175,7 +179,7 @@ describe('handleCallLeave', () => {
     await handleCallLeave(socket, io, { callId: 'call-1' });
 
     expect(mockQueryPrimary).toHaveBeenCalledWith(
-      expect.stringContaining("status = 'ended'"),
+      expect.stringContaining("state = 'ended'"),
       ['call-1']
     );
   });
