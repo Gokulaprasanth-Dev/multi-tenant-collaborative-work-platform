@@ -1,0 +1,15 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold">Task assigned to you</mj-text>
+        <mj-text>Hi {{recipientName}},</mj-text>
+        <mj-text>{{actorName}} assigned you a task: <strong>{{taskTitle}}</strong></mj-text>
+        {{#if taskDueDate}}
+        <mj-text>Due: {{taskDueDate}}</mj-text>
+        {{/if}}
+        <mj-button href="{{taskUrl}}" background-color="#4F46E5">View Task</mj-button>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+!.env.test.example
+*.log
+coverage/
+.env.loadtest
+tmp/
+
+# Internal planning docs
+PLAN.md
+TASK.md
+
+# Debug scripts
+test_jwt_service.js
+test_refresh.js
+
+# Token/credential files — never commit these
+*_token.json
+*_resp.json
+admin_token.json
+token_resp.json
+org_token_resp.json
+fresh_token.json
+*.pem
+*.key

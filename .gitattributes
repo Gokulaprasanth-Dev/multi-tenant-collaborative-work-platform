@@ -1,0 +1,6 @@
+# Enforce LF line endings for shell scripts (must run inside Linux containers)
+scripts/*.sh text eol=lf
+*.sh text eol=lf
+
+# Default: let git handle text files with platform line endings
+* text=auto

@@ -1,0 +1,97 @@
+version: '3.9'
+
+services:
+
+  # ── Email catch-all ──────────────────────────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025"   # SMTP  → EMAIL_PROVIDER=smtp
+      - "8025:8025"   # Web UI → http://localhost:8025
+    restart: unless-stopped
+
+  # ── Object storage (S3-compatible) ───────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"   # S3 API  → AWS_S3_ENDPOINT=http://localhost:9000
+      - "9001:9001"   # Console → http://localhost:9001  (user: minioadmin / minioadmin)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Create the default bucket on first boot
+  minio_init:
+    image: minio/mc:latest
+    container_name: minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/dev-files &&
+        mc anonymous set download local/dev-files
+      "
+    restart: on-failure
+
+  # ── Full-text search ─────────────────────────────────────────────────────────
+  typesense:
+    image: typesense/typesense:26.0
+    container_name: typesense
+    ports:
+      - "8108:8108"   # API → TYPESENSE_URL=http://localhost:8108
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: dev_typesense_key
+      TYPESENSE_ENABLE_CORS: "true"
+    volumes:
+      - typesense_data:/data
+    restart: unless-stopped
+
+  # ── Virus scanning ───────────────────────────────────────────────────────────
+  clamav:
+    image: clamav/clamav:stable
+    container_name: clamav
+    ports:
+      - "3310:3310"   # TCP daemon → CLAMAV_HOST=localhost, CLAMAV_PORT=3310
+    volumes:
+      - clamav_data:/var/lib/clamav
+    restart: unless-stopped
+    # First boot downloads virus definitions (~300 MB) — takes 2-5 min
+    healthcheck:
+      test: ["CMD", "clamdcheck"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # ── Video SFU (WebRTC media server) ──────────────────────────────────────────
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
+    command: --dev --bind 0.0.0.0
+    ports:
+      - "7880:7880"   # HTTP/WebSocket → LIVEKIT_URL=http://localhost:7880
+      - "7881:7881"   # RTCP/RTP (TCP)
+      - "7882:7882/udp" # RTP/RTCP (UDP)
+    environment:
+      # --dev mode auto-generates key/secret: devkey / secret
+      LIVEKIT_KEYS: "devkey: secret"
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+  typesense_data:
+  clamav_data:

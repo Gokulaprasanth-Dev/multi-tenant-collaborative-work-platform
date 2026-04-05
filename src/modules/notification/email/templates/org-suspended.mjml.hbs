@@ -1,0 +1,16 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold">Organization suspended</mj-text>
+        <mj-text>Hi {{recipientName}},</mj-text>
+        <mj-text>Your organization <strong>{{orgName}}</strong> has been suspended.</mj-text>
+        {{#if reason}}
+        <mj-text>Reason: {{reason}}</mj-text>
+        {{/if}}
+        <mj-text>Please contact support if you believe this is an error.</mj-text>
+        <mj-button href="{{supportUrl}}" background-color="#DC2626">Contact Support</mj-button>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -1,0 +1,210 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ── 1. Lint ──────────────────────────────────────────────────────────────
+  lint:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run lint
+      - run: npm run typecheck
+
+  # ── 2. Secrets scan ──────────────────────────────────────────────────────
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog secrets scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          extra_args: --only-verified
+
+  # ── 3. Audit log check ────────────────────────────────────────────────────
+  audit-log-check:
+    name: Audit Log Protection Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure no UPDATE/DELETE on audit_logs in src/
+        run: |
+          if grep -r "UPDATE.*audit_logs\|DELETE.*audit_logs" src/ --include="*.ts"; then
+            echo "ERROR: Direct UPDATE/DELETE on audit_logs is not allowed. Use partition DROP instead."
+            exit 1
+          fi
+          echo "PASS: No direct mutations on audit_logs found."
+
+  # ── 4. Unit tests ─────────────────────────────────────────────────────────
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+
+  # ── 5. Integration tests ──────────────────────────────────────────────────
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: platform_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    env:
+      DATABASE_URL: postgresql://test_user:test_password@localhost:5432/platform_test
+      TEST_DATABASE_URL: postgresql://test_user:test_password@localhost:5432/platform_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      LOG_LEVEL: warn
+      PORT: "3000"
+      CORS_ORIGINS: http://localhost:3000
+      METRICS_TOKEN: ci-metrics-token
+      ENCRYPTION_KEY: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+      JWT_PRIVATE_KEY_BASE64: ${{ secrets.CI_JWT_PRIVATE_KEY_BASE64 }}
+      JWT_PUBLIC_KEY_BASE64: ${{ secrets.CI_JWT_PUBLIC_KEY_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run test:integration
+
+  # ── 6. Build ──────────────────────────────────────────────────────────────
+  build:
+    name: TypeScript Build
+    runs-on: ubuntu-latest
+    needs: [lint, test-unit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ── 7. Deploy staging ─────────────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, test-integration, secrets-scan, audit-log-check]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Run migrations on staging
+        run: |
+          npm ci --omit=dev
+          DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} npm run migrate:up
+      - name: Rolling deploy to staging
+        run: echo "Deploy to staging (implement with your deployment provider)"
+        # Replace with: kubectl rollout restart deployment/app -n staging
+        # or: aws ecs update-service --cluster staging --service app --force-new-deployment
+
+  # ── 8. Smoke tests on staging ─────────────────────────────────────────────
+  smoke-staging:
+    name: Smoke Tests on Staging
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    env:
+      DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+      REDIS_URL: ${{ secrets.STAGING_REDIS_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run test:smoke
+
+  # ── 9. Manual gate (prod approval) ────────────────────────────────────────
+  # GitHub environment "production" must have required reviewers configured.
+
+  # ── 10. Deploy production ─────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [smoke-staging]
+    if: github.ref == 'refs/heads/main'
+    environment: production  # Requires manual approval via GitHub environment protection rules
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Run migrations on production
+        run: |
+          npm ci --omit=dev
+          DATABASE_URL=${{ secrets.PROD_DATABASE_URL }} npm run migrate:up
+      - name: Rolling deploy to production
+        run: echo "Deploy to production (implement with your deployment provider)"
+      - name: Verify /ready
+        run: |
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.PROD_APP_URL }}/ready)
+            if [ "$STATUS" = "200" ]; then
+              echo "Production /ready returned 200. Deploy successful."
+              exit 0
+            fi
+            echo "Attempt $i: /ready returned $STATUS, waiting 10s..."
+            sleep 10
+          done
+          echo "ERROR: Production /ready never returned 200."
+          exit 1

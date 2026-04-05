@@ -1,0 +1,48 @@
+version: '3.9'
+
+# Test environment — no persistence, single Postgres, TEST_DATABASE_URL set
+services:
+  app-test:
+    build: { context: ., target: production }
+    command: node dist/app.js
+    ports: ["3001:3000"]
+    depends_on:
+      postgres-test: { condition: service_healthy }
+      redis-test: { condition: service_healthy }
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://test_user:test_password@postgres-test:5432/platform_test
+      - TEST_DATABASE_URL=postgresql://test_user:test_password@postgres-test:5432/platform_test
+      - REDIS_URL=redis://redis-test:6379
+      - JWT_PRIVATE_KEY_BASE64=dGVzdC1wcml2YXRlLWtleQ==
+      - JWT_PUBLIC_KEY_BASE64=dGVzdC1wdWJsaWMta2V5
+      - LOG_LEVEL=silent
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: platform_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d platform_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    # No volume — ephemeral, discarded after tests
+
+  redis-test:
+    image: redis:7-alpine
+    command: redis-server --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+    # No volume — ephemeral

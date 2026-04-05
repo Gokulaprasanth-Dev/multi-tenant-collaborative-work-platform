@@ -1,0 +1,3 @@
+{"type":"Point","metric":"http_req_duration","data":{"value":45,"time":"2026-03-29T00:00:00Z"},"tags":{"method":"POST","status":"201"}}
+{"type":"Point","metric":"http_req_duration","data":{"value":52,"time":"2026-03-29T00:00:01Z"},"tags":{"method":"PUT","status":"200"}}
+{"type":"Point","metric":"http_req_duration","data":{"value":38,"time":"2026-03-29T00:00:02Z"},"tags":{"method":"GET","status":"200"}}

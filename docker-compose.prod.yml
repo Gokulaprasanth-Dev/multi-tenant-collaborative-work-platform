@@ -1,0 +1,82 @@
+version: '3.9'
+
+# Production override — Redis Sentinel (3 nodes + 3 sentinels), multiple app replicas
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  app:
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 15s
+        failure_action: rollback
+      resources:
+        limits: { cpus: '2', memory: '1G' }
+        reservations: { cpus: '0.5', memory: '512M' }
+    environment:
+      - REDIS_SENTINEL_HOSTS=sentinel1:26379,sentinel2:26379,sentinel3:26379
+      - REDIS_URL=  # unset — use Sentinel
+
+  worker:
+    deploy:
+      replicas: 3
+      resources:
+        limits: { cpus: '2', memory: '1G' }
+    environment:
+      - REDIS_SENTINEL_HOSTS=sentinel1:26379,sentinel2:26379,sentinel3:26379
+      - REDIS_URL=
+
+  # Redis primary
+  redis-primary:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes: [redisdata-primary:/data]
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: '256M' }
+
+  # Redis replicas
+  redis-replica-1:
+    image: redis:7-alpine
+    command: >
+      redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+      --replicaof redis-primary 6379 --masterauth ${REDIS_PASSWORD}
+    volumes: [redisdata-replica1:/data]
+    depends_on: [redis-primary]
+
+  redis-replica-2:
+    image: redis:7-alpine
+    command: >
+      redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+      --replicaof redis-primary 6379 --masterauth ${REDIS_PASSWORD}
+    volumes: [redisdata-replica2:/data]
+    depends_on: [redis-primary]
+
+  # Sentinels
+  sentinel1:
+    image: redis:7-alpine
+    command: >
+      redis-sentinel /etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/etc/redis/sentinel.conf:ro
+    depends_on: [redis-primary]
+
+  sentinel2:
+    image: redis:7-alpine
+    command: redis-sentinel /etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/etc/redis/sentinel.conf:ro
+    depends_on: [redis-primary]
+
+  sentinel3:
+    image: redis:7-alpine
+    command: redis-sentinel /etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/etc/redis/sentinel.conf:ro
+    depends_on: [redis-primary]
+
+volumes:
+  redisdata-primary:
+  redisdata-replica1:
+  redisdata-replica2:

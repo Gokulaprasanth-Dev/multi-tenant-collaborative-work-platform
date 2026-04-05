@@ -1,0 +1,23 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold">Your daily digest — {{date}}</mj-text>
+        <mj-text>Hi {{recipientName}},</mj-text>
+        <mj-text>Here's a summary of activity from the past 24 hours in <strong>{{orgName}}</strong>:</mj-text>
+        {{#each notifications}}
+        <mj-section padding="4px 0">
+          <mj-column>
+            <mj-text>• {{this.summary}}</mj-text>
+          </mj-column>
+        </mj-section>
+        {{/each}}
+        {{#unless notifications.length}}
+        <mj-text color="#6B7280">No new activity to report.</mj-text>
+        {{/unless}}
+        <mj-button href="{{appUrl}}" background-color="#4F46E5">Open App</mj-button>
+        <mj-text font-size="12px" color="#6B7280">To change your notification preferences, visit your account settings.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
