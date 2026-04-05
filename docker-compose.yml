@@ -2,6 +2,41 @@ version: '3.9'
 
 services:
 
+  # ── Database ─────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"   # DATABASE_URL=postgresql://app_user:dev_password@localhost:5432/platform_db
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: platform_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d platform_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Cache / pub-sub ───────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command: redis-server --requirepass dev_password
+    ports:
+      - "6379:6379"   # REDIS_URL=redis://:dev_password@localhost:6379
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "dev_password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # ── Email catch-all ──────────────────────────────────────────────────────────
   mailpit:
     image: axllent/mailpit:latest
@@ -92,6 +127,8 @@ services:
     restart: unless-stopped
 
 volumes:
+  postgres_data:
+  redis_data:
   minio_data:
   typesense_data:
   clamav_data:

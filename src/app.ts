@@ -93,7 +93,6 @@ app.get('/metrics', metricsAuthMiddleware, async (_req, res) => {
 
 // Health endpoints
 app.get('/live', (_req, res) => {
-  if (!appReady) return res.status(503).json({ status: 'starting' });
   res.json({ status: 'alive' });
 });
 app.get('/ready', (_req, res) => {
