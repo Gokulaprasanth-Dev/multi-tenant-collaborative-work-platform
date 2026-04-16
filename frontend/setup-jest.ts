@@ -1,5 +1,8 @@
-// Angular test environment is initialized by @angular-builders/jest via
-// jest-preset-angular/setup-jest. No additional setup needed there.
+// NOTE: Do NOT call setupZoneTestEnv() here.
+// @angular-builders/jest injects jest-preset-angular/setup-jest automatically
+// via its internal setup.js, which already calls initTestEnvironment once.
+// Calling it again from this file causes "Cannot set base providers because
+// it has already been called".
 
 // Polyfill crypto.randomUUID — jsdom does not implement it,
 // but Node's built-in crypto module does (Node 14.17+).
