@@ -1,5 +1,6 @@
-// Angular test environment is initialized by @angular-builders/jest via
-// jest-preset-angular/setup-jest. No additional setup needed there.
+// Initialize Angular test environment (TestBed.initTestEnvironment)
+import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+setupZoneTestEnv();
 
 // Polyfill crypto.randomUUID — jsdom does not implement it,
 // but Node's built-in crypto module does (Node 14.17+).

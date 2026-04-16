@@ -15,6 +15,9 @@ const config: Config = {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$|@angular/common/locales/.*\\.js$))',
+  ],
   moduleFileExtensions: ['ts', 'html', 'js', 'json', 'mjs'],
   testMatch: ['<rootDir>/src/**/*.spec.ts'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/*.spec.ts', '!src/main.ts'],
