@@ -7,7 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { WorkspaceService } from '../../../core/services/workspace.service';
-import { AppError } from '../../../core/models/api-response.model';
 
 @Component({
   selector: 'app-create-workspace-dialog',
@@ -79,11 +78,8 @@ export class CreateWorkspaceDialogComponent {
       next:  () => { this.saving.set(false); this.dialogRef.close(true); },
       error: (err: unknown) => {
         this.saving.set(false);
-        if (err instanceof AppError) {
-          this.error.set(err.message ?? 'Failed to create workspace');
-        } else {
-          this.error.set('Failed to create workspace');
-        }
+        const msg = (err as { message?: string })?.message;
+        this.error.set(msg ?? 'Failed to create workspace');
       },
     });
   }
