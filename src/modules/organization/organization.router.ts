@@ -78,6 +78,7 @@ router.get(
            AND m.status = 'active'
            AND m.deleted_at IS NULL
            AND o.deleted_at IS NULL
+           AND o.status = 'active'
          ORDER BY o.created_at ASC`,
         [req.user!.userId]
       );
