@@ -26,3 +26,9 @@ org_token_resp.json
 fresh_token.json
 *.pem
 *.key
+
+# Angular frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+.superpowers/
