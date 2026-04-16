@@ -16,12 +16,18 @@ export const routes: Routes = [
       import('./features/auth/auth.routes').then(m => m.authRoutes),
   },
   {
+    path: 'pick-org',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/org-picker/org-picker.component').then(
+        m => m.OrgPickerComponent,
+      ),
+  },
+  {
     path: 'app',
     canActivate: [authGuard, orgGuard],
-    loadComponent: () =>
-      import('./features/shell/shell-placeholder.component').then(
-        m => m.ShellPlaceholderComponent,
-      ),
+    loadChildren: () =>
+      import('./features/shell/shell.routes').then(m => m.shellRoutes),
   },
   {
     path: 'admin',

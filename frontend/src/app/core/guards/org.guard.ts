@@ -8,17 +8,26 @@ export const orgGuard: CanActivateFn = async () => {
   const tenant = inject(TenantService);
   const router = inject(Router);
 
+  // Already have an active org (e.g. after login or org-picker selection)
   if (tenant.activeOrgId()) return true;
 
-  // Try to auto-select if user belongs to exactly one org
   try {
     const orgs = await firstValueFrom(tenant.loadUserOrgs());
+
+    if (orgs.length === 0) {
+      // No org membership — send back to login
+      router.navigate(['/auth/login']);
+      return false;
+    }
+
     if (orgs.length === 1) {
-      tenant.setOrg(orgs[0]);
+      // Single org — auto-select and proceed
+      tenant.setOrg(orgs[0]!);
       return true;
     }
-    // Multiple orgs — Phase 2 shell will handle org-picker
-    router.navigate(['/auth/login']);
+
+    // Multiple orgs — let the user pick
+    router.navigate(['/pick-org']);
     return false;
   } catch {
     router.navigate(['/auth/login']);
