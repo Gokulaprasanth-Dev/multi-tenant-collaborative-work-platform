@@ -64,6 +64,28 @@ router.post(
   }
 );
 
+// GET /api/v1/orgs/mine — list all orgs the current user is an active member of
+router.get(
+  '/orgs/mine',
+  jwtMiddleware,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await queryReplica(
+        `SELECT o.id, o.name, o.slug, o.status, o.plan_tier
+         FROM organizations o
+         JOIN org_memberships m ON m.org_id = o.id
+         WHERE m.user_id = $1
+           AND m.status = 'active'
+           AND m.deleted_at IS NULL
+           AND o.deleted_at IS NULL
+         ORDER BY o.created_at ASC`,
+        [req.user!.userId]
+      );
+      res.success(result.rows);
+    } catch (err) { next(err); }
+  }
+);
+
 // GET /api/v1/orgs/:orgId
 router.get(
   '/orgs/:orgId',
