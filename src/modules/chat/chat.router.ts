@@ -60,13 +60,36 @@ router.post(
   }
 );
 
+// POST /api/v1/orgs/:orgId/channels/workspace — create workspace-scoped channel
+router.post(
+  '/orgs/:orgId/channels/workspace',
+  ...orgMiddlewareWithIdempotency,
+  validate(z.object({
+    name:         z.string().min(1).max(255),
+    workspace_id: z.string().uuid(),
+  })),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name, workspace_id } = req.body as { name: string; workspace_id: string };
+      const channel = await ChannelService.createWorkspaceChannel(
+        req.orgContext!.orgId,
+        req.user!.userId,
+        name,
+        workspace_id,
+      );
+      res.created(channel);
+    } catch (err) { next(err); }
+  }
+);
+
 // GET /api/v1/orgs/:orgId/channels
 router.get(
   '/orgs/:orgId/channels',
   ...orgMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const channels = await ChannelService.listChannels(req.orgContext!.orgId);
+      const workspaceId = req.query['workspace_id'] as string | undefined;
+      const channels = await ChannelService.listChannels(req.orgContext!.orgId, workspaceId);
       res.success(channels);
     } catch (err) { next(err); }
   }

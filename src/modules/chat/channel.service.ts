@@ -137,8 +137,31 @@ export async function getChannel(orgId: string, channelId: string): Promise<Chan
   return ch;
 }
 
-export async function listChannels(orgId: string): Promise<ChannelRow[]> {
-  return channelRepo.findByOrg(orgId);
+export async function listChannels(orgId: string, workspaceId?: string): Promise<ChannelRow[]> {
+  return channelRepo.findByOrg(orgId, workspaceId);
+}
+
+export async function createWorkspaceChannel(
+  orgId: string,
+  creatorId: string,
+  name: string,
+  workspaceId: string,
+): Promise<ChannelRow> {
+  const m = await memberRepo.findMembership(orgId, creatorId);
+  if (!m) throw new AppError(403, 'NOT_ORG_MEMBER', 'Creator is not an org member');
+
+  const channel = await withTransaction(async (client) => {
+    const ch = await channelRepo.create(orgId, 'group', creatorId, name, client, workspaceId);
+    await channelRepo.addMember(ch.id, creatorId, orgId, client);
+    await client.query(`SELECT create_channel_sequence($1)`, [ch.id]);
+    return ch;
+  });
+
+  await writeOutboxEvent('channel.created', orgId, channel.id, creatorId, {
+    channelId: channel.id, orgId, type: 'group', name, workspaceId,
+  });
+
+  return channel;
 }
 
 export async function assertChannelMember(channelId: string, userId: string): Promise<void> {

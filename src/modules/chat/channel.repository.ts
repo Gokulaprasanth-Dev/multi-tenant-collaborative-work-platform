@@ -7,6 +7,7 @@ export interface ChannelRow {
   type: 'direct' | 'group';
   name: string | null;
   created_by: string;
+  workspace_id: string | null;
   deleted_at: Date | null;
   created_at: Date;
   updated_at: Date;
@@ -39,7 +40,16 @@ export class ChannelRepository {
     return (result.rows[0] as unknown as ChannelRow) ?? null;
   }
 
-  async findByOrg(orgId: string): Promise<ChannelRow[]> {
+  async findByOrg(orgId: string, workspaceId?: string): Promise<ChannelRow[]> {
+    if (workspaceId) {
+      const result = await queryReplica(
+        `SELECT * FROM channels
+         WHERE org_id = $1 AND workspace_id = $2 AND deleted_at IS NULL
+         ORDER BY created_at ASC`,
+        [orgId, workspaceId]
+      );
+      return result.rows as unknown as ChannelRow[];
+    }
     const result = await queryReplica(
       `SELECT * FROM channels WHERE org_id = $1 AND deleted_at IS NULL ORDER BY created_at ASC`,
       [orgId]
@@ -52,11 +62,13 @@ export class ChannelRepository {
     type: 'direct' | 'group',
     createdBy: string,
     name: string | null,
-    client: PoolClient
+    client: PoolClient,
+    workspaceId?: string | null,
   ): Promise<ChannelRow> {
     const result = await client.query(
-      `INSERT INTO channels (org_id, type, name, created_by) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [orgId, type, name, createdBy]
+      `INSERT INTO channels (org_id, type, name, created_by, workspace_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [orgId, type, name, createdBy, workspaceId ?? null]
     );
     return result.rows[0] as unknown as ChannelRow;
   }
