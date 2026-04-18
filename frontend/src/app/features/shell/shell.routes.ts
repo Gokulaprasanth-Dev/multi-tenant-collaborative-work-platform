@@ -26,6 +26,13 @@ export const shellRoutes: Routes = [
             m => m.workspaceShellRoutes,
           ),
       },
+      {
+        path: 'settings/notifications',
+        loadComponent: () =>
+          import('../notifications/notification-preferences/notification-preferences.component').then(
+            m => m.NotificationPreferencesComponent,
+          ),
+      },
     ],
   },
 ];
