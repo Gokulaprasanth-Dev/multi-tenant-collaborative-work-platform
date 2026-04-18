@@ -36,6 +36,7 @@ import taskRouter from './modules/task/task.router';
 import chatRouter from './modules/chat/chat.router';
 import notificationRouter from './modules/notification/notification.router';
 import { pushRouter } from './modules/notification/push.router';
+import { startNotificationBroadcaster } from './shared/realtime/notification-broadcaster';
 import paymentRouter from './modules/payment/payment.router';
 import fileRouter from './modules/file/file.router';
 import searchRouter from './modules/search/search.router';
@@ -184,6 +185,7 @@ async function start(): Promise<void> {
     appReady = true;
     logger.info('Migrations complete. /ready now 200.');
     outboxPoller.start();
+    await startNotificationBroadcaster(io);
     startQueueMetricsCollection();
   } catch (err) {
     logger.error({ err }, 'Migration failed. /ready remains 503.');
