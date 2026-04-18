@@ -4,6 +4,16 @@
 // Calling it again from this file causes "Cannot set base providers because
 // it has already been called".
 
+// Mock Notification API — JSDOM returns 'default' by default, which fails permission checks
+Object.defineProperty(globalThis, 'Notification', {
+  value: {
+    requestPermission: jest.fn().mockResolvedValue('granted'),
+    permission: 'granted',
+  },
+  writable: true,
+  configurable: true,
+});
+
 // Polyfill crypto.randomUUID — jsdom does not implement it,
 // but Node's built-in crypto module does (Node 14.17+).
 import { randomUUID } from 'crypto';
