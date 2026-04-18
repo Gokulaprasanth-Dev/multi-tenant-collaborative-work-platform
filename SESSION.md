@@ -2,24 +2,17 @@
 <!-- Auto-maintained by Claude. Updated every 5 turns or after every commit. Never delete. -->
 
 ## Last Updated
-2026-04-18 | Task 6 of implementation plan
+2026-04-18 | Tasks 11–18 complete
 
 ## Active Task
-Phase 3A frontend (Angular) — Tasks 11–18 remaining on branch `feature/phase3-task-chat`
+Phase 3A frontend (Angular) — ALL TASKS COMPLETE on branch `feature/phase3-task-chat`
 
 ## State
-IN_PROGRESS
+COMPLETE — ready to merge / create PR
 
 ## Resumption Point
-Task 13 of the Phase 3A plan: update `frontend/src/app/features/shell/shell.routes.ts` to add the `/workspaces/:id` lazy child route pointing to `workspace-shell.routes.ts`. Files already written (not yet committed):
-- `frontend/src/app/features/shell/workspace-shell/workspace-shell.component.ts` ✓
-- `frontend/src/app/features/shell/workspace-shell/workspace-shell.component.spec.ts` ✓
-- `frontend/src/app/features/shell/workspace-shell/workspace-sidebar/workspace-sidebar.component.ts` ✓
-- `frontend/src/app/features/shell/workspace-shell/workspace-sidebar/workspace-sidebar.component.spec.ts` ✓
-- `frontend/src/app/features/shell/workspace-shell/workspace-shell.routes.ts` ✓
-- `frontend/src/app/features/chat/create-channel-dialog/create-channel-dialog.component.ts` ✓
-
-Next action: edit `shell.routes.ts` to add the `:id` lazy child, then run `npx ng test --watch=false` to verify, then commit Tasks 11–13.
+All 18 tasks in the Phase 3A plan are done and committed. 78 tests pass across 22 suites.
+Next: run `superpowers:finishing-a-development-branch` to decide merge strategy.
 
 ## What's Done This Session
 - [x] Migration 017 — workspace_id on channels
@@ -31,18 +24,20 @@ Next action: edit `shell.routes.ts` to add the `:id` lazy child, then run `npx n
 - [x] MessageService (TDD, 5 tests)
 - [x] _shell.scss — workspace shell, task, chat CSS classes
 - [x] sug-1 system: install.sh guard, settings.json hook, CLAUDE.md dedup, project-CLAUDE.md trim, full install
+- [x] Tasks 11–13: WorkspaceShellComponent, WorkspaceSidebarComponent, CreateChannelDialogComponent, shell.routes.ts lazy child
+- [x] Tasks 14–17: CreateTaskDialogComponent, TaskListComponent (TDD), ChannelViewComponent (TDD)
+- [x] Task 18: Smoke test — 78 tests, 22 suites, all green
 
 ## Broken / Unstable Right Now
-Nothing broken. 63 tests passing across 18 suites (`npx ng test --watch=false` from `frontend/`).
+Nothing broken.
 
 ## Last Decision Made
-Run frontend tests via `npx ng test --watch=false` (not `npx jest` directly) — jest fails with zone.js error when run outside the Angular builder.
+`provideRouter([])` overrides explicitly provided `ActivatedRoute` mock when listed before it in the providers array — always place `ActivatedRoute` mock AFTER `provideRouter([])` in TestBed providers.
 
 ## Context That Would Be Lost
-- `workspace-shell` component files are written but not yet committed — they exist on disk but `git status` shows them as untracked.
-- Tests must be run from `frontend/` directory.
 - Phase 3A plan is at `docs/superpowers/plans/2026-04-17-frontend-phase3-task-chat.md`.
-- After Tasks 13–17, run full smoke test (Task 18) then merge.
+- Tests must be run from `frontend/` directory via `npx ng test --watch=false`.
+- All commits are on branch `feature/phase3-task-chat`.
 
 ## Open Questions
-None — plan is approved, executing top-to-bottom.
+None.
