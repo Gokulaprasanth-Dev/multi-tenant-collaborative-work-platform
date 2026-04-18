@@ -51,6 +51,9 @@ const schema = z.object({
   livekitUrl: z.string().optional(),
   livekitApiKey: z.string().optional(),
   livekitApiSecret: z.string().optional(),
+  vapidPublicKey: z.string().default(''),
+  vapidPrivateKey: z.string().default(''),
+  vapidContact: z.string().default('mailto:admin@example.com'),
 });
 
 const parsed = schema.safeParse({
@@ -106,6 +109,9 @@ const parsed = schema.safeParse({
   livekitUrl: process.env.LIVEKIT_URL,
   livekitApiKey: process.env.LIVEKIT_API_KEY,
   livekitApiSecret: process.env.LIVEKIT_API_SECRET,
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
+  vapidContact: process.env.VAPID_CONTACT,
 });
 
 if (!parsed.success) {
