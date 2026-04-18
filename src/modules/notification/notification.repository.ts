@@ -1,4 +1,5 @@
 import { queryPrimary, queryReplica } from '../../shared/database/pool';
+import { redisClient } from '../../shared/redis/clients';
 
 export interface NotificationRow {
   id: string;
@@ -65,7 +66,12 @@ export class NotificationRepository {
         JSON.stringify(data.payload ?? {}),
       ]
     );
-    return result.rows[0] as unknown as NotificationRow;
+    const row = result.rows[0] as unknown as NotificationRow;
+    await redisClient.publish(
+      `notification:${row.org_id}:user:${row.user_id}`,
+      JSON.stringify(row),
+    );
+    return row;
   }
 
   async findByUser(
