@@ -4,4 +4,5 @@ export const environment = {
   apiUrl:        '',               // set via CI environment variable at build time
   wsUrl:         '',
   razorpayKeyId: '',
+  vapidPublicKey: process.env['VAPID_PUBLIC_KEY'] ?? '',
 };

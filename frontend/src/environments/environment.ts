@@ -4,4 +4,5 @@ export const environment = {
   apiUrl:        '',               // proxied via proxy.conf.json in dev
   wsUrl:         'http://localhost:3000',
   razorpayKeyId: '',
+  vapidPublicKey: '',
 };
