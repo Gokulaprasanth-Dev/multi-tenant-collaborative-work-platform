@@ -35,6 +35,7 @@ import orgRouter from './modules/organization/organization.router';
 import taskRouter from './modules/task/task.router';
 import chatRouter from './modules/chat/chat.router';
 import notificationRouter from './modules/notification/notification.router';
+import { pushRouter } from './modules/notification/push.router';
 import paymentRouter from './modules/payment/payment.router';
 import fileRouter from './modules/file/file.router';
 import searchRouter from './modules/search/search.router';
@@ -123,6 +124,7 @@ app.use('/api/v1', chatRouter);
 
 // Routes — Phase 8 (Notifications)
 app.use('/api/v1', notificationRouter);
+app.use('/api/v1', pushRouter);
 
 // Routes — Phase 9 (Payments)
 app.use('/api/v1', paymentRouter);
