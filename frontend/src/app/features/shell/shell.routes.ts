@@ -19,6 +19,13 @@ export const shellRoutes: Routes = [
             m => m.WorkspaceListComponent,
           ),
       },
+      {
+        path: 'workspaces/:id',
+        loadChildren: () =>
+          import('./workspace-shell/workspace-shell.routes').then(
+            m => m.workspaceShellRoutes,
+          ),
+      },
     ],
   },
 ];
