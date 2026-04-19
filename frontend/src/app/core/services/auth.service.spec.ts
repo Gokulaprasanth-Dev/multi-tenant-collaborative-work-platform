@@ -7,8 +7,11 @@ import { TokenStorageService } from './token-storage.service';
 
 const mockUser = {
   id: 'u-1', email: 'a@b.com', name: 'Alice',
+  bio: null, avatarUrl: null,
   emailVerified: true, mfaEnabled: false,
-  role: 'member' as const, createdAt: '2026-01-01',
+  role: 'member' as const,
+  preferences: { timezone: 'UTC', locale: 'en-US', theme: 'dark' as const, dateFormat: 'DD/MM/YYYY' as const },
+  createdAt: '2026-01-01',
 };
 
 describe('AuthService', () => {

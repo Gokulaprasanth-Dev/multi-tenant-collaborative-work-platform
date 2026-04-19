@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, switchMap, catchError, tap, filter, take } from 'rxjs';
-import { User } from '../models/user.model';
+import { User, defaultPreferences } from '../models/user.model';
 import { ApiResponse } from '../models/api-response.model';
 import { TokenStorageService } from './token-storage.service';
 
@@ -111,11 +111,19 @@ export class AuthService {
       id:            payload.sub,
       email:         payload.email,
       name:          payload.name ?? payload.email,
+      bio:           null,
+      avatarUrl:     null,
       emailVerified: true,
       mfaEnabled:    payload.mfaEnabled ?? false,
       role:          payload.role ?? 'member',
+      preferences:   defaultPreferences(),
       createdAt:     payload.iat ? new Date(payload.iat * 1000).toISOString() : '',
     });
+  }
+
+  /** Called by UserService after profile/preferences mutations. */
+  updateCurrentUser(user: User): void {
+    this.currentUserSignal.set(user);
   }
 
   logout(): void {
