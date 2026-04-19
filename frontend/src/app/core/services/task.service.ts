@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, EMPTY, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs';
 import { Task, TaskDto, TaskStatus, TaskPriority, toTask } from '../models/task.model';
+import { Comment, CommentDto, toComment } from '../models/comment.model';
 import { ApiResponse } from '../models/api-response.model';
 import { TenantService } from './tenant.service';
 
@@ -48,6 +49,16 @@ export class TaskService {
         map((res: ApiResponse<TaskDto>) => toTask(res.data)),
         tap((task: Task) => this.tasks.update((prev: Task[]) => [...prev, task])),
       );
+  }
+
+  addComment(taskId: string, body: Record<string, unknown>, attachments: string[] = []): Observable<Comment> {
+    const orgId = this.tenant.activeOrgId()!;
+    return this.http
+      .post<ApiResponse<CommentDto>>(
+        `/api/v1/orgs/${orgId}/tasks/${taskId}/comments`,
+        { body: { ...body, attachments } }
+      )
+      .pipe(map((res: ApiResponse<CommentDto>) => toComment(res.data)));
   }
 
   updateStatus(taskId: string, status: TaskStatus, version: number): Observable<Task> {

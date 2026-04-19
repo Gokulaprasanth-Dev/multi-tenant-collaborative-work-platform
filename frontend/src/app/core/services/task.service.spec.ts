@@ -5,6 +5,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TaskService } from './task.service';
 import { TenantService } from './tenant.service';
 import { TaskDto } from '../models/task.model';
+import { Comment, CommentDto } from '../models/comment.model';
 
 const TASK_DTO: TaskDto = {
   id: 'task-1', org_id: 'org-1', workspace_id: 'ws-1',
@@ -82,4 +83,31 @@ describe('TaskService', () => {
     tick();
     expect(service.tasks()[0].status).toBe('todo'); // reverted
   }));
+
+  describe('addComment', () => {
+    it('should POST comment and return Comment', fakeAsync(() => {
+      tenant.setOrg({ id: 'org-1', name: 'Acme', slug: 'acme', status: 'active', plan: 'free' });
+      let result: Comment | undefined;
+      service.addComment('task-1', { ops: [{ insert: 'hello\n' }] }, []).subscribe(c => result = c);
+
+      const req = ctrl.expectOne('/api/v1/orgs/org-1/tasks/task-1/comments');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        body: { ops: [{ insert: 'hello\n' }], attachments: [] },
+      });
+
+      req.flush({
+        data: {
+          id: 'c-1', task_id: 'task-1', author_user_id: 'u-1',
+          body: { ops: [{ insert: 'hello\n' }], attachments: [] },
+          created_at: '2026-04-18T00:00:00Z',
+        } as CommentDto,
+        error: null, meta: {},
+      });
+
+      tick();
+      expect(result?.id).toBe('c-1');
+      expect(result?.taskId).toBe('task-1');
+    }));
+  });
 });
