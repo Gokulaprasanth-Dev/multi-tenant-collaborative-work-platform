@@ -3,8 +3,9 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { TaskListComponent } from './task-list.component';
+import { FileService } from '../../../core/services/file.service';
 import { TaskService } from '../../../core/services/task.service';
 import { Task } from '../../../core/models/task.model';
 
@@ -18,7 +19,7 @@ const TASK: Task = {
 
 describe('TaskListComponent', () => {
   let fixture: ComponentFixture<TaskListComponent>;
-  let taskSvc: { tasks: ReturnType<typeof signal<Task[]>>; loading: ReturnType<typeof signal<boolean>>; load: jest.Mock; updateStatus: jest.Mock };
+  let taskSvc: { tasks: ReturnType<typeof signal<Task[]>>; loading: ReturnType<typeof signal<boolean>>; load: jest.Mock; updateStatus: jest.Mock; addComment: jest.Mock };
 
   beforeEach(async () => {
     taskSvc = {
@@ -26,12 +27,14 @@ describe('TaskListComponent', () => {
       loading:      signal(false),
       load:         jest.fn().mockReturnValue(of([])),
       updateStatus: jest.fn().mockReturnValue(of(TASK)),
+      addComment:   jest.fn().mockReturnValue(of({})),
     };
 
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
       providers: [
         { provide: TaskService, useValue: taskSvc },
+        { provide: FileService, useValue: { upload: jest.fn().mockReturnValue(new Subject()) } },
         provideRouter([]),
         provideAnimations(),
         {

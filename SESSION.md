@@ -2,50 +2,48 @@
 <!-- Auto-maintained by Claude. Updated every 5 turns or after every commit. Never delete. -->
 
 ## Last Updated
-2026-04-18 | Phase 5 file management — plan written, not yet implemented
+2026-04-19 | Phase 5 file management — ALL TASKS COMPLETE
 
 ## Active Task
-Phase 5 file management — ready to implement
+Phase 5 file management — complete. Ready to push to origin/main.
 
 ## State
-PLANNING COMPLETE — implementation plan written, no code started yet
+ALL TASKS GREEN — 136 frontend tests, 0 type errors
 
 ## Resumption Point
-Phase 5 plan is at `docs/superpowers/plans/2026-04-18-frontend-phase5-files.md`.
-- Phase 4 pushed to origin/main (all green)
-- CLAUDE.md updated (migration range fixed to 018, e2e/smoke commands added, env section added)
-- frontend/CLAUDE.md updated (push notification test gotcha + child component mock gotcha added)
-Start by reading the Phase 5 plan, then invoke `superpowers:subagent-driven-development` to execute it task by task.
+Phase 5 is complete on branch `feature/phase5-files`.
+- All 12 tasks implemented, tested, committed
+- 136 frontend tests passing, typecheck clean
+- Next: merge to main, push, close out the branch
 
 ## What's Done This Session
-- [x] Task 1: migration 018 — push_subscriptions table
-- [x] Task 2: push.service.ts with VAPID config, unit tests (TDD)
-- [x] Task 3: push.router.ts — POST/DELETE /push/subscribe, mounted in app.ts
-- [x] Task 4: notification.repository.ts — publish to Redis after INSERT
-- [x] Task 5: notification-broadcaster.ts — Redis psubscribe → Socket.IO notification:new
-- [x] Task 6: notification.model.ts — Notification + NotificationPreference interfaces; vapidPublicKey in environment files
-- [x] Task 7: NotificationService — load, markRead, markAllRead, subscribeRealtime (TDD)
-- [x] Task 8: PushNotificationService — SW registration, VAPID subscribe/unsubscribe (TDD)
-- [x] Task 9: NotificationBellComponent — bell icon, unread badge, panel toggle (TDD)
-- [x] Task 10: NotificationPanelComponent — All/Unread/Mentions tabs, mark all read (TDD)
-- [x] Task 11: NotificationItemComponent — unread dot, label, click-to-navigate
-- [x] Task 12: NotificationPreferencesComponent — per-event toggles, push enable, blocked state (TDD)
-- [x] Task 13: TopbarComponent — NotificationBellComponent added to right side
-- [x] Task 14: shell.routes.ts — settings/notifications lazy route
-- [x] Task 15: sw.js — push event handler + notificationclick; added to angular.json assets
-- [x] Task 16: Smoke test — 101 frontend tests, 368 backend tests, zero type errors
+- [x] Phase 4: 101 frontend tests, 368 backend tests (carried over from prior session)
+- [x] Phase 5 Task 1: file.model.ts — UploadState, FileUpload, FileRecord, FileRecordDto, UploadUrlResult
+- [x] Phase 5 Task 2: file.service.ts — stateless upload orchestrator (presigned POST → XHR → poll)
+- [x] Phase 5 Task 3: FileChipComponent — compact chip with state icon, progress bar, cancel/dismiss
+- [x] Phase 5 Task 4: FileUploadComponent — signal<FileUpload[]>, drop/paste/picker, hasPending(), clearReady()
+- [x] Phase 5 Task 5: FilePreviewComponent — renders img/iframe/video/audio/<a> by mimeType
+- [x] Phase 5 Task 6: FilesPageComponent + shell route /files
+- [x] Phase 5 Task 7: message.model.ts + MessageService — attachments: string[] added to Message + send()
+- [x] Phase 5 Task 8: ChannelViewComponent — FileUploadComponent wired into compose area
+- [x] Phase 5 Task 9: comment.model.ts + TaskService.addComment(taskId, body, attachments)
+- [x] Phase 5 Task 10: TaskCommentComponent — inline editor with FileUploadComponent
+- [x] Phase 5 Task 11: TaskListComponent — expandedTaskId signal, toggleExpand, TaskCommentComponent row
+- [x] Phase 5 Task 12: Final verification — 136 tests, 0 type errors
 
 ## Broken / Unstable Right Now
 Nothing broken.
 
 ## Last Decision Made
-Added `flushPromises` helper (using `setTimeout`) and `Notification.requestPermission` mock to `setup-jest.ts` — JSDOM returns `'default'` by default which fails the permission check, and `await Promise.resolve()` alone is not enough to drain the full Promise chain in tests.
+FileService is a stateless orchestrator — no signals, no shared state. FileUploadComponent owns its own `signal<FileUpload[]>` list per instance, preventing cross-context leakage between chat, task comments, and the files page.
 
 ## Context That Would Be Lost
-- Phase 4 plan is at `docs/superpowers/plans/2026-04-18-frontend-phase4-notifications.md`.
-- Tests must be run from `frontend/` directory via `npx ng test --watch=false`.
-- All commits are on branch `feature/phase4-notifications`.
-- The bell test mock must include `notifications`, `loading`, `markRead`, `markAllRead` signals/methods — the panel component accesses them transitively.
+- Phase 5 plan is at `docs/superpowers/plans/2026-04-18-frontend-phase5-files.md`.
+- Tests must be run from `frontend/` directory via `node_modules/.bin/ng test --watch=false` (NOT raw jest — Angular builder injects zone.js/testing).
+- fakeAsync + XHR: must mock `XMLHttpRequest` globally via `jest.spyOn(globalThis as any, 'XMLHttpRequest')` — zone.js blocks real XHRs inside fakeAsync.
+- JSDOM has no DataTransfer — paste tests use `{ clipboardData: { files: [file] } } as unknown as ClipboardEvent`.
+- All Phase 5 commits are on branch `feature/phase5-files`.
+- Windows worktree path issue: `.worktrees` creates mixed-slash paths that break jest glob — execute plans directly in the main directory instead.
 
 ## Open Questions
 None.

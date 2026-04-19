@@ -32,13 +32,13 @@ export class MessageService {
       );
   }
 
-  send(channelId: string, body: string): Observable<Message> {
+  send(channelId: string, body: string, attachments: string[] = []): Observable<Message> {
     const orgId = this.tenant.activeOrgId()!;
     this.sending.set(true);
     return this.http
       .post<ApiResponse<MessageDto>>(
         `/api/v1/orgs/${orgId}/channels/${channelId}/messages`,
-        { body, client_message_id: crypto.randomUUID() }
+        { body, client_message_id: crypto.randomUUID(), attachments }
       )
       .pipe(
         map((res: ApiResponse<MessageDto>) => toMessage(res.data)),

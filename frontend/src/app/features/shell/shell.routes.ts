@@ -27,6 +27,11 @@ export const shellRoutes: Routes = [
           ),
       },
       {
+        path: 'files',
+        loadComponent: () =>
+          import('../files/files-page.component').then(m => m.FilesPageComponent),
+      },
+      {
         path: 'settings/notifications',
         loadComponent: () =>
           import('../notifications/notification-preferences/notification-preferences.component').then(
