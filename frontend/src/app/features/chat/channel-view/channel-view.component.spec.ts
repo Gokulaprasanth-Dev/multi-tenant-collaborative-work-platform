@@ -3,10 +3,11 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
-import { of, Subscription } from 'rxjs';
+import { of, Subscription, Subject } from 'rxjs';
 import { ChannelViewComponent } from './channel-view.component';
 import { MessageService } from '../../../core/services/message.service';
 import { ChannelService } from '../../../core/services/channel.service';
+import { FileService } from '../../../core/services/file.service';
 import { Message } from '../../../core/models/message.model';
 import { Channel } from '../../../core/models/channel.model';
 
@@ -42,6 +43,7 @@ describe('ChannelViewComponent', () => {
       providers: [
         { provide: MessageService, useValue: msgSvc },
         { provide: ChannelService, useValue: chSvc },
+        { provide: FileService, useValue: { upload: jest.fn().mockReturnValue(new Subject()) } },
         provideRouter([]),
         {
           provide: ActivatedRoute,
@@ -82,6 +84,6 @@ describe('ChannelViewComponent', () => {
     const form = fixture.nativeElement.querySelector('form');
     form.dispatchEvent(new Event('submit'));
     tick();
-    expect(msgSvc.send).toHaveBeenCalledWith('ch-1', 'Hi there');
+    expect(msgSvc.send).toHaveBeenCalledWith('ch-1', 'Hi there', []);
   }));
 });
