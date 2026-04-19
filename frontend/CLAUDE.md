@@ -147,6 +147,28 @@ export const environment = {
 
 Use `proxy.conf.json` during development to proxy `/api` to `http://localhost:3000` to avoid CORS.
 
+## Testing Gotchas (JSDOM / Angular)
+
+Always use `node_modules/.bin/ng test --watch=false` — never raw `jest`. Angular builder injects zone.js/testing; raw jest breaks `fakeAsync`.
+
+**Preemptive mocks — assume missing in JSDOM, mock on first use:**
+
+| API | Pattern |
+|---|---|
+| `DataTransfer`, `ClipboardEvent`, `DragEvent` | `{ clipboardData: { files: [f] } } as unknown as ClipboardEvent` — never `new DataTransfer()` |
+| `XMLHttpRequest` inside `fakeAsync` | `jest.spyOn(globalThis as any, 'XMLHttpRequest').mockImplementation(() => mockXhr)` — zone.js blocks real XHR |
+| `fetch`, `WebSocket`, `IntersectionObserver`, `ResizeObserver`, `matchMedia` | Assume absent, mock in `beforeEach` |
+| `File.arrayBuffer()` | Mock — older JSDOM doesn't implement it |
+
+**Scoped test runs:**
+- Intermediate tasks: `--testPathPattern="<filename>"` — not the full suite.
+- Full suite only at milestone commits.
+
+**Child component mocks:**
+- Service mocks must cover all dependencies of child components that render during the test (e.g. if a click expands a child that uses `FileService`, the parent spec needs a `FileService` mock).
+
+---
+
 ## Key dependencies
 
 | Package | Purpose |
