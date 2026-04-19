@@ -38,6 +38,12 @@ import { WorkspaceService } from '../../../../core/services/workspace.service';
         <span class="nav-icon">⊞</span>
         <span class="nav-label">All workspaces</span>
       </a>
+
+      <div class="sidebar-section-label" style="margin-top:8px;">Account</div>
+      <a class="sidebar-nav-item" routerLink="/app/settings" routerLinkActive="active">
+        <span class="nav-icon">⚙</span>
+        <span class="nav-label">Settings</span>
+      </a>
     </nav>
 
     <!-- User footer -->

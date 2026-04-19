@@ -32,11 +32,9 @@ export const shellRoutes: Routes = [
           import('../files/files-page.component').then(m => m.FilesPageComponent),
       },
       {
-        path: 'settings/notifications',
-        loadComponent: () =>
-          import('../notifications/notification-preferences/notification-preferences.component').then(
-            m => m.NotificationPreferencesComponent,
-          ),
+        path: 'settings',
+        loadChildren: () =>
+          import('../settings/settings.routes').then(m => m.settingsRoutes),
       },
     ],
   },

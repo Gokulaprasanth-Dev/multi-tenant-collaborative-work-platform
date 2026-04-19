@@ -18,3 +18,33 @@ body {
 
 // Load Inter font
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+[data-theme="light"] {
+  body { background: #f8fafc; color: #0f172a; }
+  .shell { background: #f1f5f9; }
+  .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
+  .sidebar-brand {
+    &:hover { background: rgba(0, 0, 0, 0.04); }
+  }
+  .sidebar-brand-name { color: #0f172a; }
+  .sidebar-brand-chevron { color: #94a3b8; }
+  .sidebar-section-label { color: #94a3b8; }
+  .sidebar-nav-item {
+    color: #475569;
+    &:hover { background: rgba(0, 0, 0, 0.04); color: #0f172a; }
+    &.active { background: rgba(168, 85, 247, 0.1); color: #7c3aed; border-right-color: #7c3aed; }
+  }
+  .sidebar-footer { border-top-color: #e2e8f0; }
+  .sidebar-user-name { color: #0f172a; }
+  .sidebar-user-email { color: #94a3b8; }
+  .topbar { background: rgba(248, 250, 252, 0.9); border-bottom-color: #e2e8f0; }
+  .topbar-title { color: #0f172a; }
+  .main-content { background: #f8fafc; }
+  .workspace-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    &:hover { background: #f8fafc; border-color: rgba(124, 58, 237, 0.4); }
+    .workspace-card-name { color: #0f172a; }
+    .workspace-card-desc { color: #94a3b8; }
+  }
+}
