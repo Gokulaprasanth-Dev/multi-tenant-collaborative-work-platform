@@ -7,6 +7,7 @@ export interface Message {
   body: string;
   clientMessageId: string;
   createdAt: string;
+  attachments: string[];
 }
 
 export interface MessageDto {
@@ -16,6 +17,7 @@ export interface MessageDto {
   body: string;
   client_message_id: string;
   created_at: string;
+  attachments?: string[];
 }
 
 export function toMessage(dto: MessageDto): Message {
@@ -26,5 +28,6 @@ export function toMessage(dto: MessageDto): Message {
     body:            dto.body,
     clientMessageId: dto.client_message_id,
     createdAt:       dto.created_at,
+    attachments:     dto.attachments ?? [],
   };
 }

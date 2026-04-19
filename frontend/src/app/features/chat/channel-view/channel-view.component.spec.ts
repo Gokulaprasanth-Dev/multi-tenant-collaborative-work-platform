@@ -12,7 +12,7 @@ import { Channel } from '../../../core/models/channel.model';
 
 const MSG: Message = {
   id: 'msg-1', channelId: 'ch-1', senderUserId: 'u-1',
-  body: 'Hello!', clientMessageId: 'cid-1', createdAt: '2024-01-01T10:00:00.000Z',
+  body: 'Hello!', clientMessageId: 'cid-1', createdAt: '2024-01-01T10:00:00.000Z', attachments: [],
 };
 
 const CH: Channel = {
